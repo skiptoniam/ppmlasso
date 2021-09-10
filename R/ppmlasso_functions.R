@@ -48,7 +48,7 @@ mu.from.eta = function(eta, family, mu.min = 1.e-16, mu.max = 1/mu.min)
 	mu[mu < mu.min] = mu.min
 	mu[mu > mu.max] = mu.max
 	mu
-}	
+}
 
 eta.from.mu = function(mu, family, mu.min = 1.e-16, mu.max = 1/mu.min, eta.min, eta.max)
 {
@@ -66,7 +66,7 @@ irls.update = function(y, X, ob.wt, is.in, signs, eta, mu, alpha, lambda, beta.o
 		lambda = rep(0, dim(X)[2])
 		signs  = rep(0, dim(X)[2])
 	}
-	
+
 	vari  = family$variance(mu)
 	deriv = 1/vari
 	z     = eta + (y - mu)*deriv
@@ -93,11 +93,11 @@ irls.update = function(y, X, ob.wt, is.in, signs, eta, mu, alpha, lambda, beta.o
 		{
 			beta.new = solve(xwx + diag((1 - alpha)*lambda[is.in])) %*% (Xw %*% z - as.matrix(alpha * lambda[is.in] * signs[is.in]))
 		}
-		
+
 		eta.new  = as.matrix(X[,is.in]) %*% as.matrix(beta.new)
 		eta.new[eta.new < eta.min] = eta.min
 		eta.new[eta.new > eta.max] = eta.max
-		
+
 		mu.new = family$linkinv(eta.new)
 		mu.new[mu.new < mu.min] = mu.min
 		mu.new[mu.new > mu.max] = mu.max
@@ -142,7 +142,7 @@ gcv.calc = function(y, X, ob.wt, b.lasso, lambda, alpha = alpha, unp.likelihood 
 	xwx          = wt %*% X[,is.in]
 	bpinv        = rep(0, length(b.lasso))
 	bpinv[is.in] = 1/abs(b.lasso[is.in])
-	ginv         = diag(bpinv)	
+	ginv         = diag(bpinv)
 
 	if (sum(is.in) > 1)
 	{
@@ -155,19 +155,19 @@ gcv.calc = function(y, X, ob.wt, b.lasso, lambda, alpha = alpha, unp.likelihood 
 
 	if (family$family == "poisson")
 	{
-		dev = -2*(sum(ob.wt*(y*log(mu) - mu)) + sum(y > 0)) 
+		dev = -2*(sum(ob.wt*(y*log(mu) - mu)) + sum(y > 0))
 	}
-	
+
 	if (family$family == "binomial")
 	{
 		dev = -2*unp.likelihood
 	}
-	
+
 	if (family$family == "gaussian")
 	{
 		dev = -2*(unp.likelihood - like.calc(X, family, ob.wt[y > 0], y[y > 0], y, alpha, lambda, beta = b.lasso, penalty = FALSE))
 	}
-	
+
 	if (eff.df < n.pres)
 	{
 		gcv = dev/(n.pres*(1 - (eff.df)/n.pres)^2)
@@ -219,7 +219,7 @@ single.lasso = function(y, X, lamb, ob.wt = rep(1, length(y)), alpha = 1, b.init
 	b.lasso = b.glm
 	if (length(lamb) == 1)
 	{
-		lambda.start    = rep(lamb, dim(X)[2])	
+		lambda.start    = rep(lamb, dim(X)[2])
 		lambda.start[1] = 0
 		lambda = as.array(lambda.start)
 		lambda = lambda * abs(adapt.weights[1:length(lambda)])
@@ -284,12 +284,12 @@ single.lasso = function(y, X, lamb, ob.wt = rep(1, length(y)), alpha = 1, b.init
 		{
 			b.lasso = c(log(mean(y)), rep(0, (dim(X)[2] - 1 - area.int)), rep(1, area.int))
 		}
-		
+
 		if (family$family == "binomial")
 		{
 			b.lasso = c(log(mean(y)/(1 - mean(y))), rep(0, (dim(X)[2] - 1 - area.int)), rep(1, area.int))
 		}
-	
+
 		if (family$family == "gaussian")
 		{
 			b.lasso = c(mean(y), rep(0, (dim(X)[2] - 1 - area.int)), rep(1, area.int))
@@ -315,12 +315,12 @@ single.lasso = function(y, X, lamb, ob.wt = rep(1, length(y)), alpha = 1, b.init
 	eta.old[eta.old < eta.min] = eta.min
 	eta.old[eta.old > eta.max] = eta.max
 	mu.old  = mu.from.eta(eta.old, family = family, mu.min, mu.max)
-	
+
 	like    = like.calc(X, family, ob.wt, mu = mu.old, y, alpha, lambda, beta = b.lasso, penalty = TRUE)
 	likes   = c(likes, like)
 
 	if (length(lamb) == 1 & lamb[1] == 0)
-	{	
+	{
 		diff   = 0
 		num.it = max.it + 1
 	}
@@ -329,7 +329,7 @@ single.lasso = function(y, X, lamb, ob.wt = rep(1, length(y)), alpha = 1, b.init
 	{
 		mult     = 0
 		update   = irls.update(y, X, ob.wt, is.in, signs, eta = eta.old, mu = mu.old, alpha = alpha, lambda = lambda, beta.old = b.lasso, penalty = TRUE, family = family, mu.min, mu.max, eta.min, eta.max, tol)
-		
+
 
 		if (update$error == "Singular matrix")
 		{
@@ -343,7 +343,7 @@ single.lasso = function(y, X, lamb, ob.wt = rep(1, length(y)), alpha = 1, b.init
 		sign.change[sign.change == 0] = 1
 		score.beta                    = rep(0, length(b.lasso))
 		score.beta[is.in]             = update$beta
-	
+
 		if (any(sign.change != 1) == TRUE)
 		{
 			delta                       = update$beta - b.lasso[is.in]
@@ -395,7 +395,7 @@ single.lasso = function(y, X, lamb, ob.wt = rep(1, length(y)), alpha = 1, b.init
 				actions = rbind(actions, paste("Step ", dim(as.matrix(betas))[2] + 1, ": Add variable ", act, sep = ""))
 			}
 		}
-		
+
 		betas        = cbind(betas, b.lasso)
 		scores       = cbind(scores, score)
 		viols        = cbind(viols, viol)
@@ -426,7 +426,7 @@ single.lasso = function(y, X, lamb, ob.wt = rep(1, length(y)), alpha = 1, b.init
 		xwx          = wt %*% X[,is.in]
 		bpinv        = rep(0, length(b.lasso))
 		bpinv[is.in] = 1/abs(b.lasso[is.in])
-		ginv         = diag(bpinv)	
+		ginv         = diag(bpinv)
 		n.param      = length(b.lasso[is.in]) - 1 + area.int
 
 		if (sum(is.in) > 1)
@@ -436,7 +436,7 @@ single.lasso = function(y, X, lamb, ob.wt = rep(1, length(y)), alpha = 1, b.init
 		if (sum(is.in) == 1)
 		{
 			eff.df = sum(diag(solve(xwx + diag(as.matrix(lambda[is.in])) %*% ginv[is.in, is.in]) %*% xwx)) + area.int
-		}	
+		}
 
 		n.pres = sum(y > 0)
 
@@ -445,19 +445,19 @@ single.lasso = function(y, X, lamb, ob.wt = rep(1, length(y)), alpha = 1, b.init
 
 		if (family$family == "poisson")
 		{
-			dev            = -2*(sum(ob.wt*(y*log(mu) - mu)) + sum(y > 0)) 
+			dev            = -2*(sum(ob.wt*(y*log(mu) - mu)) + sum(y > 0))
 		}
-	
+
 		if (family$family == "binomial")
 		{
 			dev            = -2*unp.likelihood
 		}
-	
+
 		if (family$family == "gaussian")
 		{
 			dev            = -2*(unp.likelihood - like.calc(X, family, ob.wt[y > 0], y[y > 0], y, alpha, lambda, beta = b.lasso, penalty = FALSE))
 		}
-	
+
 		if (eff.df < n.pres)
 		{
 			gcv     = dev/(n.pres*(1 - (eff.df)/n.pres)^2)
@@ -507,10 +507,10 @@ ppmlasso = function(formula, sp.xy, env.grid, sp.scale, coord = c("X", "Y"), dat
 	mf   = model.frame(formula, data = data)
 	mt   = attr(mf, "terms")
    	y    = data$Pres/data$wt
-	X    = if (!is.empty.model(mt)) 
+	X    = if (!is.empty.model(mt))
         model.matrix(mt, mf, contrasts)
    	 else matrix(, NROW(y), 0L)
-	
+
 	if (any(X[,1] != 1))
 	{
 		X = as.matrix(cbind(1, X))
@@ -621,13 +621,13 @@ ppmlasso = function(formula, sp.xy, env.grid, sp.scale, coord = c("X", "Y"), dat
 
 	if (criterion == "blockCV")
 	{
-		lambda.max = max(abs(score.int(data$Pres/data$wt, X, ob.wt = data$wt, area.int = area.int, int = interactions, family = poisson())[-1]))	
+		lambda.max = max(abs(score.int(data$Pres/data$wt, X, ob.wt = data$wt, area.int = area.int, int = interactions, family = poisson())[-1]))
 		lambs      = exp(seq(0, -12, length.out = n.fits))*lambda.max
 	}
 
 	n.pres     = sum(y > 1.e-8)
 	n.var      = dim(X)[2] - 1
-	
+
 	if (criterion == "msi")
 	{
 		lambs = max.lambda/sqrt(n.pres)
@@ -688,7 +688,7 @@ ppmlasso = function(formula, sp.xy, env.grid, sp.scale, coord = c("X", "Y"), dat
 
 			num.done = length(lambs) + 1 - sum(is.na(aics))
 			s.denom  = sum(abs(mod.0$coef[-c(1, (n.var + 2))]))
-	
+
 			if (n.var > n.pres)
 			{
 				s.denom = sum(abs(coefs[-c(1, (n.var + 2)), num.done]))
@@ -715,7 +715,7 @@ ppmlasso = function(formula, sp.xy, env.grid, sp.scale, coord = c("X", "Y"), dat
 				nlgcvs[i.nlgcv] = nlgcv
 			}
 		}
-		
+
 		if (sum(is.infinite(adapt.weights[-1])) == (length(adapt.weights) - 1 - area.int))
 		{
 			coefs     = matrix(rep(init.coef, (length(lambs) + 1)), length(adapt.weights), (length(lambs) + 1))
@@ -740,7 +740,7 @@ ppmlasso = function(formula, sp.xy, env.grid, sp.scale, coord = c("X", "Y"), dat
 			coefs[,length(lambs)] = init.coef
 		}
 		num.param[(length(lambs) + 1)] = length(adapt.weights) - sum(is.infinite(adapt.weights[-c(1, (n.var + 2))])) - 1 - area.int
-		
+
 		meth.id  = paste(criterion, "s", sep = "")
 
 		if (criterion == "msi" | criterion == "blockCV")
@@ -759,7 +759,7 @@ ppmlasso = function(formula, sp.xy, env.grid, sp.scale, coord = c("X", "Y"), dat
 		like.hat   = ll[choice.id]
 
 		assign(paste("coefs.", cv.i, sep = ""), coefs)
-		
+
 
 		if (criterion == "blockCV")
 		{
@@ -808,7 +808,7 @@ ppmlasso = function(formula, sp.xy, env.grid, sp.scale, coord = c("X", "Y"), dat
 		if (area.int != TRUE)
 		{
 			lambda.max = max(abs(score.int(data$Pres/data$wt, X, ob.wt = data$wt, family = poisson())[-1]))
-		}	
+		}
 
 		if (area.int == TRUE)
 		{
@@ -835,7 +835,7 @@ ppmlasso = function(formula, sp.xy, env.grid, sp.scale, coord = c("X", "Y"), dat
 		{
 			X.0 = X
 		}
-		
+
 		lambda.hat = lambs
 		beta.hat   = coefs
 		eta.hat    = X.0 %*% beta.hat
@@ -846,7 +846,7 @@ ppmlasso = function(formula, sp.xy, env.grid, sp.scale, coord = c("X", "Y"), dat
 
 	family.out = family$family
 	if (area.int == TRUE)
-	{	
+	{
 		family.out = "area.inter"
 	}
 	output = list(betas = coefs, lambdas = lambs, likelihoods = ll, pen.likelihoods = pll, lambda = lambda.hat, beta = beta.hat, mu = mu.hat, likelihood = like.hat, criterion = criterion, family = family.out, gamma = gamma, alpha = alpha, init.coef = init.coef, criterion.matrix = criterion.matrix, data = X.0, pt.interactions = raw.int, wt = ob.wt, pres = data$Pres, x = data$X, y = data$Y, r = r, call = call, formula = formula.out, s.means = s.means, s.sds = s.sds, cv.group = cv, n.blocks = n.blocks)
@@ -861,7 +861,7 @@ ppm.ss = function(fit)
 	pres.y = fit$y[fit$pres > 0]
 	quad.x = fit$x[fit$pres == 0]
 	quad.y = fit$y[fit$pres == 0]
-	
+
 	ux = unique(quad.x)
 	uy = unique(quad.y)
 	ux = sort(ux)
@@ -982,7 +982,7 @@ ppm.ss = function(fit)
 	w.1   = weii
 	Xw    = t(as.vector(sqrt(weii)) * t(t(fit$data)))
 	q.1   = qr(t(Xw))
-	
+
 	glm.1$qr      = q.1
 	glm.1$weights = w.1
 	glm.1$family  = quasi(log)
@@ -1059,8 +1059,8 @@ interp = function(sp.xy, sp.scale, f, back.xy, coord = c("X","Y"))
 	c21 = 1 - is.na(f21)
 	c22 = 1 - is.na(f22)
 
-	env.wt.mat = cbind(f11*w11*c11, f12*w12*c12, f21*w21*c21, f22*w22*c22) 
-	
+	env.wt.mat = cbind(f11*w11*c11, f12*w12*c12, f21*w21*c21, f22*w22*c22)
+
 	f.interp = apply(env.wt.mat, 1, sum, na.rm = TRUE)/(w11*c11 + w12*c12 + w21*c21 + w22*c22)
 	f.interp
 }
@@ -1081,7 +1081,7 @@ env.var = function(sp.xy, env.grid, env.scale, coord = c("X","Y"), file.name = N
 	x.col   = which(names(env.grid) == coord[1])
 	y.col   = which(names(env.grid) == coord[2])
 	var.col = setdiff(1:dim(env.grid)[2], c(x.col, y.col))
-	
+
 	sp.dat        = as.data.frame(matrix(NA, length(x.dat), length(var.col)))
 	names(sp.dat) = names(env.grid[var.col])
 
@@ -1098,7 +1098,7 @@ env.var = function(sp.xy, env.grid, env.scale, coord = c("X","Y"), file.name = N
 		cat(paste("Calculating species environmental data for variable:", names(sp.dat)[var], "\n"))
 		flush.console()
 	}
-	
+
 	sp.dat = data.frame(x.dat, y.dat, sp.dat)
 	names(sp.dat)[1:2] = c("X", "Y")
 	if (is.na(file.name) == FALSE)
@@ -1120,7 +1120,7 @@ sample.quad = function(env.grid, sp.scale, coord = c("X", "Y"), file = "Quad")
 	{
 		is.cat    = which(lapply(env.grid, class) == "factor")
 		cat.names = names(env.grid)[is.cat]
-		env.grid  = CatConvert(env.grid)$X	
+		env.grid  = CatConvert(env.grid)$X
 	}
 	f.name = list()
 	for(i in 1:length(sp.scale))
@@ -1132,7 +1132,7 @@ sample.quad = function(env.grid, sp.scale, coord = c("X", "Y"), file = "Quad")
 		y.step  = sort(unique(env.grid[,y.col]))[2] - sort(unique(env.grid[,y.col]))[1]
 
 		x.o = min(env.grid[,x.col]) - floor(min(env.grid[,x.col])/x.step)*x.step
-		y.o = min(env.grid[,y.col]) - floor(min(env.grid[,y.col])/y.step)*y.step	
+		y.o = min(env.grid[,y.col]) - floor(min(env.grid[,y.col])/y.step)*y.step
 
 		is.on.scale   = abs((env.grid[,x.col]/i.scale) - round(env.grid[,x.col]/i.scale) - x.o) + abs((env.grid[,y.col]/i.scale) - round(env.grid[,y.col]/i.scale) - y.o) < 1.e-8
 	  	dat.quad      = env.grid[is.on.scale,]
@@ -1153,7 +1153,7 @@ weights = function(sp.xy, quad.xy, coord = c("X", "Y"))
 {
 	sp.col   = c(which(names(sp.xy) == coord[1]), which(names(sp.xy) == coord[2]))
 	quad.col = c(which(names(quad.xy) == coord[1]), which(names(quad.xy) == coord[2]))
-	
+
 	X.inc   = sort(unique(quad.xy[,quad.col[1]]))[2] - sort(unique(quad.xy[,quad.col[1]]))[1]
 	Y.inc   = sort(unique(quad.xy[,quad.col[2]]))[2] - sort(unique(quad.xy[,quad.col[2]]))[1]
 	quad.0X = min(quad.xy[,quad.col[1]]) - floor(min(quad.xy[,quad.col[1]])/X.inc)*X.inc
@@ -1201,7 +1201,7 @@ ppmdat = function(sp.xy, sp.scale, back.xy, coord = c("X","Y"), sp.dat = env.var
 
 	dat.quad$Pres = 0
 	sp.dat$Pres   = 1
-	
+
 	quad.x.col = which(names(dat.quad) == coord[1])
 	quad.y.col = which(names(dat.quad) == coord[2])
 	sp.x.col   = which(names(sp.dat) == coord[1])
@@ -1215,8 +1215,8 @@ ppmdat = function(sp.xy, sp.scale, back.xy, coord = c("X","Y"), sp.dat = env.var
 	quad.dat        = data.frame(dat.quad[,quad.x.col], dat.quad[,quad.y.col], dat.quad[,quad.var])
 	names(quad.dat) = c("X", "Y", names(dat.quad)[quad.var])
 	dat.ppm         = rbind(sp.data, quad.dat)
-	
-	dat.ppm$wt = weights(sp.data, quad.dat, coord)	
+
+	dat.ppm$wt = weights(sp.data, quad.dat, coord)
 
 	dimnames(dat.ppm)[[1]] = 1:dim(dat.ppm)[1]
 	if (is.na(file.name) == FALSE)
@@ -1248,8 +1248,8 @@ point.interactions = function(dat.ppm, r, availability = NA)
 
 		availability = matrix(1, 1 + (max.y - min.y)/grain, 1 + (max.x - min.x)/grain)
 		rownames(availability) = seq(min.y, max.y, grain)
-		colnames(availability) = seq(min.x, max.x, grain)	
-	}	
+		colnames(availability) = seq(min.x, max.x, grain)
+	}
 
 	cat(paste("Calculating point interactions", "\n"))
 	flush.console()
@@ -1343,7 +1343,7 @@ print.ppmlasso = function(x, ..., output = c("all", "path", "model", "interactio
 		if (x$family == "area.inter")
 		{
 			output = c("path", "model", "interaction")
-		}	
+		}
 	}
 	model.grammar = if (length(x$lambdas) > 1)
 		"models"
@@ -1398,7 +1398,7 @@ setMethod("print", "ppmlasso", print.ppmlasso)
 envelope.ppmlasso = function(Y, fun = Kest, ...)
 {
 	fit.ss = ppm.ss(Y)
-	envelope(Y = fit.ss, fun = fun, ...)
+	spatstat.core::envelope(Y = fit.ss, fun = fun, ...)
 }
 
 setMethod("envelope", "ppmlasso", envelope.ppmlasso)
@@ -1460,7 +1460,7 @@ predict.ppmlasso = function(object, ..., newdata, interactions = NA)
 	}
 	mf    = model.frame(object$formula, data = newdata)
 	mt    = attr(mf, "terms")
-	X.des = if (!is.empty.model(mt)) 
+	X.des = if (!is.empty.model(mt))
         model.matrix(mt, mf, contrasts)
    	 else matrix(, length(object$mu), 0L)
 	X.var = X.des[,-1]
@@ -1514,7 +1514,7 @@ blocks = function(n.blocks, block.scale, dat, seed = 1)
 	{
    		cell.group = cell.group + as.numeric(dat$X > xq[i.group])
 	}
-	
+
 	yq = block.scale*(1:n.groups[2]) + min(dat$Y)
 	for (i.group in 1:n.groups[2])
 	{
